@@ -23,7 +23,7 @@ async function loadGenres() {
     try {
       await genresrModel.deleteMany();
       await genresrModel.collection.insertMany(genres);
-      console.info(`${genres.length} users were successfully stored.`);
+      console.info(`${genres.length} genres were successfully stored.`);
     } catch (err) {
       console.error(`failed to Load genres Data: ${err}`);
     }
