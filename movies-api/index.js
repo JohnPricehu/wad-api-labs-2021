@@ -6,7 +6,7 @@ import usersRouter from './api/users';
 import './db';
 import './seedData'
 import session from 'express-session';
-import authenticate from './authentication';
+import authenticate from './authenticate';
 
 dotenv.config();
 
@@ -35,7 +35,7 @@ app.use('/api/genres', genresRouter);
 
 app.use('/api/users', usersRouter);
 
-app.use('/api/movies', moviesRouter);
+app.use('/api/movies', authenticate, moviesRouter);
 
 app.use(errHandler);
 
