@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { json } from 'express';
 import User from './userModel';
 import asyncHandler from 'express-async-handler';
 import jwt from 'jsonwebtoken';
@@ -19,8 +19,14 @@ router.post('/',asyncHandler( async (req, res, next) => {
       return next();
     }
     if (req.query.action === 'register') {
-      await User.create(req.body);
-      res.status(201).json({code: 201, msg: 'Successful created new user.'});
+        const paswordRule = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{5,}$/;
+        if(paswordRule.test(req.body.password)){
+            await User.create(req.body);
+            res.status(201).json({success: true, msg: 'Successful created new user.'});
+        }else{
+            res.status(401).json({success: false, msg: 'Fail created new user.'})
+        }
+      
     } else {
       const user = await User.findByUserName(req.body.username);
         if (!user) return res.status(401).json({ success: false, msg: 'Authentication failed. User not found.' });
@@ -48,14 +54,19 @@ router.put('/:id', async (req, res) => {
         res.status(404).json({ code: 404, msg: 'Unable to Update User' });
     }
 });
+
 router.post('/:userName/favourites', asyncHandler(async (req, res) => {
     const newFavourite = req.body.id;
     const userName = req.params.userName;
     const movie = await movieModel.findByMovieDBId(newFavourite);
     const user = await User.findByUserName(userName);
-    await user.favourites.push(movie._id);
-    await user.save(); 
-    res.status(201).json(user); 
+    if(!user.favourites.includes(movie._id)){
+       await user.favourites.push(movie._id);
+        await user.save(); 
+        res.status(201).json(user);  
+    }else {
+        res.status(401).json({success: false, msg: 'The movie already exists in the favorite list.'});
+      }
   }));
 
 router.get('/:userName/favourites', asyncHandler( async (req, res) => {
